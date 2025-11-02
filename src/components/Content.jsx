@@ -1,6 +1,26 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FcSearch } from "react-icons/fc";
+
 const Content = () => {
+  let [state, setState] = useState({
+    index: 0,
+    dishes: [],
+    dish: "",
+  });
+  useEffect(() => {
+    try {
+      const fetchData = async () => {
+        const response = await fetch(
+          "https://www.themealdb.com/api/json/v1/1/search.php?s=chicken"
+        );
+        const data = await response.json();
+        setState({ ...state, dishes: data.meals });
+      };
+      fetchData();
+    } catch (error) {
+      console.error(error.message);
+    }
+  }, []);
   return (
     <div className="px-1 ">
       <div className="flex justify-between bg-neutral-200 items-center">
@@ -25,42 +45,69 @@ const Content = () => {
           </div>
         </form>
       </div>
-      <div>
-        <article>
-          <h3 className="my-6 lg:my-8  text-3xl lg:text-4xl font-bold text-neutral-800 flex items-center gap-4 flex-wrap">
-            Name of the food{" "}
-            <span className="bg-neutral-200 font-normal text-sm px-2 rounded-full">
-              Category
-            </span>{" "}
-            <span className="bg-neutral-200 font-normal text-sm px-2 rounded-full">
-              Region
-            </span>
-          </h3>
-          <img
-            src="https://images.pexels.com/photos/33771131/pexels-photo-33771131.jpeg"
-            alt="Recipe Image"
-          />
+      <div className="max-w-4xl mx-auto">
+        {state.dishes.map((dish, i) => (
+          <article>
+            <h3 className="my-8 lg:my-12  text-3xl lg:text-4xl font-bold text-neutral-800 flex items-center gap-4 flex-wrap">
+              {i + 1}, {dish.strMeal}
+              <span className="bg-neutral-200 font-normal text-sm px-2 rounded-full">
+                {dish.strCategory}
+              </span>{" "}
+              <span className="bg-neutral-200 font-normal text-sm px-2 rounded-full">
+                {dish.strArea}
+              </span>
+            </h3>
+            <img
+              src={dish.strMealThumb}
+              alt={dish.strMeal}
+              className="w-full"
+            />
 
-          <h3 className="font-bold text-2xl mt-6 mb-2 lg:mb-4 text-neutral-800">Ingredients</h3>
-          <ul className="list-">
-            <li>Item1</li>
-            <li>Item2</li>
-            <li>Item3</li>
-            <li>Item4</li>
-          </ul>
+            <h3 className="font-bold text-2xl mt-6 mb-2 lg:mb-4 text-neutral-800">
+              Ingredients
+            </h3>
+            <ul className="list-decimal pl-4">
+              {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => {
+                const ingredient = dish[`strIngredient${num}`];
+                const measure = dish[`strMeasure${num}`];
+                if (ingredient && measure && ingredient.trim() !== "") {
+                  return (
+                    <li key={num}>
+                      {ingredient} - {measure}
+                    </li>
+                  );
+                }
+                return null;
+              })}
+            </ul>
 
-          <h3 className="font-bold text-2xl mt-6 mb-2 lg:mb-4 text-neutral-800">Instructions</h3>
-          <p>
-            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure
-            fugiat quod aperiam cupiditate beatae facilis tenetur laboriosam
-            velit itaque doloremque.
-          </p>
+            <h3 className="font-bold text-2xl mt-6 mb-2 lg:mb-4 text-neutral-800">
+              Instructions
+            </h3>
+            <p>{dish.strInstructions}</p>
 
-          <ul className="flex items-center justify-start gap-3 mt-6 lg:mt-8 flex-wrap">
-            <li className=" bg-neutral-200 px-2 rounded-full font-normal text-base">Video</li>
-            <li className=" bg-neutral-200 px-2 rounded-full font-normal text-base">Source</li>
-          </ul>
-        </article>
+            <ul className="flex items-center justify-start gap-3 mt-6 lg:mt-8 flex-wrap">
+              <li className=" bg-neutral-200 px-2 rounded-full font-normal text-base">
+                <a
+                  href={dish.strYoutube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Video
+                </a>
+              </li>
+              <li className=" bg-neutral-200 px-2 rounded-full font-normal text-base">
+                <a
+                  href={dish.strSource}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Source
+                </a>
+              </li>
+            </ul>
+          </article>
+        ))}
       </div>
     </div>
   );
