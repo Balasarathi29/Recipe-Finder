@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+p,li {
+    @apply text-neutral-600;
+    line-height: 1.8;
+}
